@@ -1,0 +1,85 @@
+# Read Me: Telegram Data Analysis Pipeline
+
+This project processes and analyzes Telegram chat data from the "Āgenskalna klīnika" channel. The pipeline consists of several Python scripts, each responsible for a specific stage of data extraction, cleaning, analysis, and visualization. Below is an overview of each script and its purpose.
+
+## Pipeline Overview
+
+### 1. 01-html-csv.py (modified -  https://github.com/gabekanegae/telegram-export-converter)
+- **Purpose:** Extracts messages from Telegram HTML export files and saves them as a CSV file.
+- **Input:** `MESSAGES/messages.html`, `MESSAGES/messages2.html` (not included in file due to data sensitivity)
+- **Output:** `DATA/01_Telegram-Āgenskalna_klīnika-main.csv`
+- **Details:** Filters messages by sender ("Āgenskalna klīnika").
+
+### 2. 02_language_split.py
+- **Purpose:** Splits the main CSV into separate files by language (Latvian, English, Russian, German).
+- **Input:** `DATA/01_Telegram-Āgenskalna_klīnika-main.csv`
+- **Output:**
+  - `DATA/02_lv_main.csv`
+  - `DATA/02_eng_main.csv`
+  - `DATA/02_ru_main.csv`
+  - `DATA/02_de_main.csv`
+- **Details:** Uses regex and function word lists to detect language.
+
+### 3. 03_cleaning.py
+- **Purpose:** Cleans the Latvian messages (removes stopwords, URLs, emojis, artifacts, etc.).
+- **Input:** `DATA/02_lv_main.csv`, `DATA/stop_words_latvian.txt`
+- **Output:** `DATA/03_lv_main_cleaned.csv`
+- **Details:** Uses Stanza for tokenization. Prepares data for linguistic analysis.
+
+### 4. 04_main_freaquencies.py
+- **Purpose:** Calculates word frequencies and generates a word cloud for Latvian messages.
+- **Input:** `DATA/03_lv_main_cleaned.csv`
+- **Output:**
+  - `DATA/05_lv_freaquencies.csv`
+  - `DATA/05_lv_wordcloud.png`
+- **Details:** Lemmatizes words using Stanza, visualizes top words.
+
+### 5. 05_target_collocations_sarunas.py
+- **Purpose:** Extracts trigrams (three-word sequences) containing a target lemma (e.g., "potēt" or "vakcinēt").
+- **Input:** `DATA/03_lv_main_cleaned.csv`
+- **Output:** Console output of top trigrams and their counts.
+- **Details:** Useful for collocation and context analysis.
+
+### 6. 06_LDA_topic.py
+- **Purpose:** Performs topic modeling (LDA) on the cleaned Latvian messages.
+- **Input:** `DATA/03_lv_main_cleaned.csv`
+- **Output:**
+  - `DATA/06_LDA_topic_vizualization.csv`
+  - `DATA/06_lda_5topics_cleaned.html`
+- **Details:** Uses Gensim and Stanza for lemmatization and topic modeling. Visualizes topics with pyLDAvis.
+
+### 7. 07_close_reading.py
+- **Purpose:** Filters messages for those containing vaccine-related lemmas (e.g., "vakcinēt", "potēt").
+- **Input:** `DATA/01_Telegram-Āgenskalna_klīnika-main.csv`
+- **Output:** `DATA/07_close_reading.csv`
+- **Details:** Uses Stanza to lemmatize and match target words.
+
+### 08_language_frequencies.py
+- **Purpose:** Performs multilingual lemmatization and frequency analysis for English, German, and Russian text corpora and generates frequency-based visualizations.
+- **Input:**
+  - `DATA/02_eng_main.csv`
+  - `DATA/02_de_main.csv`
+  - `DATA/02_ru_main.csv`
+- **Output:** Console output of - Total lemma count before and after stopword removal, Top 10 most frequent lemmas per language
+- **Details:** The script processes each language separately using Stanza lemmatization, applies manually curated stopword lists, and produces comparable frequency statistics and word cloud visualizations for cross-linguistic analysis.
+
+## Achievements
+- Automated extraction and cleaning of Telegram chat data.
+- Language detection and separation for multilingual analysis.
+- Advanced text cleaning and lemmatization for Latvian.
+- Frequency analysis, collocation extraction, and topic modeling.
+- Visualization of word frequencies and topics.
+- Focused filtering for close reading of vaccine-related discussions.
+- Lemmatization and frequency analysis for foreign-language corpora (EN/DE/RU) with custom stopwords and word clouds.
+
+## Requirements
+- Python 3.x
+- pandas, stanza, gensim, matplotlib, wordcloud, pyLDAvis
+- Download Latvian models for Stanza (done automatically in scripts)
+
+## Usage
+Run each script in order for a full pipeline, or use individual scripts for specific tasks. Adjust file paths as needed for your environment.
+
+---
+Author: Gundega Fedotova
+Date: November 2025
